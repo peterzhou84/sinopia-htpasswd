@@ -2,6 +2,7 @@ var assert = require('assert')
   , parse_htpasswd = require('../utils').parse_htpasswd
   , verify_password = require('../utils').verify_password
   , add_user_to_htpasswd = require('../utils').add_user_to_htpasswd
+  , set_pwd = require('../utils').set_pwd
 
 describe('parse_htpasswd', function() {
   // TODO
@@ -54,3 +55,15 @@ describe('add_user_to_htpasswd', function() {
   })
 })
 
+
+describe('set_pwd', function() {
+  it('should change passwd for existing user', function() {
+    var res = set_pwd("testtest\nuser:xxxx\nendline", 'user', 'passwd')
+    assert(res.match(/^testtest\nuser:[^:\n]+:autocreated [^\n]+/g))
+  })
+
+  it('should not change anything for none existing user', function() {
+    var res = set_pwd("testtest\nuser1:xxxx\nendline", 'user', 'passwd')
+    assert(res == "testtest\nuser1:xxxx\nendline");
+  })
+})

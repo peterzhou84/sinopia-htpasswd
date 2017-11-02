@@ -1,13 +1,13 @@
 {
-  "name"                : "sinopia-htpasswd",
-  "version"             : "0.4.5",
-  "description"         : "auth plugin for sinopia supporting htpasswd format",
+  "name"                : "sinopia-htpasswd-ext",
+  "version"             : "0.1.0",
+  "description"         : "auth plugin for sinopia supporting htpasswd format based on sinopia-htpasswd module",
 
-  "author"              : { "name": "Alex Kocharin"
-                          , "email": "alex@kocharin.ru" },
+  "author"              : { "name": "Peter Zhou"
+                          , "email": "zjzhoufy@126.com" },
 
   "repository"          : { "type": "git"
-                          , "url": "git://github.com/rlidwka/sinopia-htpasswd" },
+                          , "url": "git@github.com:peterzhou84/sinopia-htpasswd.git" },
 
   "optionalDependencies": { "crypt3": ">=0.1.5 <1.0.0-0"
                           , "fs-ext": "*" },

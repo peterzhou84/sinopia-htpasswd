@@ -115,7 +115,39 @@ function add_user_to_htpasswd(body, user, passwd) {
   return body + newline
 }
 
+function set_pwd(body, user, passwd) {
+  if (user != encodeURIComponent(user)) {
+    var err = Error("username shouldn't contain non-uri-safe characters")
+    err.status = 409
+    throw err
+  }
+
+  if (crypt3) {
+    passwd = crypt3(passwd)
+  } else {
+    passwd = '{SHA}' + crypto.createHash('sha1').update(passwd, 'binary').digest('base64')
+  }
+
+  var comment = 'autocreated ' + (new Date()).toJSON()
+
+  var newbody = "";
+  var lines = body.split('\n');
+  for(var i= 0; i < lines.length;++i){
+    var line = lines[i];
+    var args = line.split(':', 3)
+    if (args.length > 1 && args[0]==user){
+      newbody+="\n" + user + ":"+passwd + ":" + comment;
+    }else{
+      newbody+="\n" + line;
+    }
+  }
+
+  return newbody.length>0?newbody.substring(1):newbody;
+}
+
+
 module.exports.parse_htpasswd = parse_htpasswd
 module.exports.verify_password = verify_password
 module.exports.add_user_to_htpasswd = add_user_to_htpasswd
+module.exports.set_pwd = set_pwd
 module.exports.lock_and_read = lock_and_read

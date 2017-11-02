@@ -103,6 +103,65 @@ HTPasswd.prototype.adduser = function(user, password, real_cb) {
   })
 }
 
+
+// hopefully race-condition-free way to add users:
+// 1. lock file for writing (other processes can still read)
+// 2. reload .htpasswd
+// 3. update data and write new data into .htpasswd.tmp
+// 4. move .htpasswd.tmp to .htpasswd
+// 5. reload .htpasswd
+// 6. unlock file
+HTPasswd.prototype.setpwd = function(user, password, real_cb) {
+  var self = this
+
+  function sanity_check() {
+    var err = null
+    if (self._users[user]) {
+      err = Error('this user already exists')
+    } else if (Object.keys(self._users).length >= self._maxusers) {
+      err = Error('maximum amount of users reached')
+    }
+    if (err) err.status = 403
+    return err
+  }
+
+  // preliminary checks, just to ensure that file won't be reloaded if it's not needed
+  var s_err = sanity_check()
+  if (s_err) return real_cb(s_err, false)
+
+  utils.lock_and_read(self._path, function(err, fd, res) {
+    // callback that cleanups fd first
+    function cb(err) {
+      if (!fd) return real_cb(err, !err)
+      fs.close(fd, function() {
+        real_cb(err, !err)
+      })
+    }
+
+    // ignore ENOENT errors, we'll just create .htpasswd in that case
+    if (err && err.code != 'ENOENT') return cb(err)
+
+    var body = (res || '').toString('utf8')
+    self._users = utils.parse_htpasswd(body)
+
+    // real checks, to prevent race conditions
+    var s_err = sanity_check()
+    if (s_err) return cb(s_err)
+
+    try {
+      body = utils.set_pwd(body, user, password)
+    } catch(err) {
+      return cb(err)
+    }
+    fs.writeFile(self._path, body, function(err) {
+      if (err) return cb(err)
+      self._reload(function() {
+        cb(null, true)
+      })
+    })
+  })
+}
+
 HTPasswd.prototype._reload = function(_callback) {
   var self = this
 
