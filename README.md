@@ -3,10 +3,14 @@
 
 ```sh
 $ npm install sinopia
-$ npm install sinopia-htpasswd
+$ npm install sinopia-htpasswd-ext
 ```
 
 PS: Actually, this module is bundled with sinopia, so you don't have to install it like this. But with other auth plugins you have to.
+
+## What's the difference
+
+Added the change password functionality. 
 
 ## Config
 
@@ -14,7 +18,7 @@ Add to your `config.yaml`:
 
 ```yaml
 auth:
-  htpasswd:
+  'htpasswd-ext':
     file: ./htpasswd
 
     # Maximum amount of users allowed to register, defaults to "+inf".
@@ -39,7 +43,7 @@ $ echo "user:`mkpasswd --method=sha-512 password`" >> htpasswd
 It's called as:
 
 ```js
-require('sinopia-htpasswd')(config, stuff)
+require('sinopia-htpasswd-ext')(config, stuff)
 ```
 
 Where:
@@ -66,6 +70,7 @@ This should export two functions:
     - `cb(err)` in case of a fatal error (error will be returned to user, keep those rare)
     - `cb(null, false)` in case user not authenticated (next auth plugin will be executed)
     - `cb(null, [groups])` in case user is authenticated
-   
+
+
    Groups is an array of all users/usergroups this user has access to. You should probably include username itself here.
    
