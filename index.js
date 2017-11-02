@@ -114,21 +114,6 @@ HTPasswd.prototype.adduser = function(user, password, real_cb) {
 HTPasswd.prototype.setpwd = function(user, password, real_cb) {
   var self = this
 
-  function sanity_check() {
-    var err = null
-    if (self._users[user]) {
-      err = Error('this user already exists')
-    } else if (Object.keys(self._users).length >= self._maxusers) {
-      err = Error('maximum amount of users reached')
-    }
-    if (err) err.status = 403
-    return err
-  }
-
-  // preliminary checks, just to ensure that file won't be reloaded if it's not needed
-  var s_err = sanity_check()
-  if (s_err) return real_cb(s_err, false)
-
   utils.lock_and_read(self._path, function(err, fd, res) {
     // callback that cleanups fd first
     function cb(err) {
@@ -143,10 +128,6 @@ HTPasswd.prototype.setpwd = function(user, password, real_cb) {
 
     var body = (res || '').toString('utf8')
     self._users = utils.parse_htpasswd(body)
-
-    // real checks, to prevent race conditions
-    var s_err = sanity_check()
-    if (s_err) return cb(s_err)
 
     try {
       body = utils.set_pwd(body, user, password)

@@ -1,6 +1,6 @@
 {
   "name"                : "sinopia-htpasswd-ext",
-  "version"             : "0.1.1",
+  "version"             : "0.1.2",
   "description"         : "auth plugin for sinopia supporting htpasswd format based on sinopia-htpasswd module",
 
   "author"              : { "name": "Peter Zhou"
